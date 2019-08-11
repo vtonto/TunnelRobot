@@ -22,20 +22,24 @@
   * @date  7/14/2019 
   * @solution 无
   */
-
+int x,y,z;
+bool strightFlag = false;
+bool first_in = true;
+int ini_angle,cur_angle;
 int main(void)
 {
-	unsigned char chrTemp[30];
-	//unsigned char str[100];
-	float a[3],w[3],h[3],Angle[3];
+	//char str[100];
+	//unsigned char len,i;
 	
 	delay_init();
-	//ADCx_Init();
-	IIC_Init();
+	ADCx_Init();
 	General_Motor_Config();
 	General_Servo_Config();
 	DMA_UART_Config();
 	General_Light_Config();
+	
+	Initial_UART4(9600);
+	delay_ms(1000);//等等JY-91初始化完成
 	
 	PlatAngleSet(15, 16);
 	LightPwnSet(0);
@@ -52,7 +56,7 @@ int main(void)
 		DMA_Rece_Buf[i]=0;
 	}
 	
-//**********************************************************************//
+//********************************************************************//
 //	while(1)
 //	{
 //		if(ReceiveComplete)
@@ -65,28 +69,14 @@ int main(void)
 //			}
 //		}
 //	}
-//**********************************************************************//
-	
+//********************************************************************//
 	while(1)
 	{
-		delay_ms(100);
-		IICreadBytes(0x50, AX, 24,&chrTemp[0]);
-		a[0] = (float)CharToShort(&chrTemp[0])/32768*16;
-		a[1] = (float)CharToShort(&chrTemp[2])/32768*16;
-		a[2] = (float)CharToShort(&chrTemp[4])/32768*16;
-		w[0] = (float)CharToShort(&chrTemp[6])/32768*2000;
-		w[1] = (float)CharToShort(&chrTemp[8])/32768*2000;
-		w[2] = (float)CharToShort(&chrTemp[10])/32768*2000;
-		h[0] = CharToShort(&chrTemp[12]);
-		h[1] = CharToShort(&chrTemp[14]);
-		h[2] = CharToShort(&chrTemp[16]);
-		Angle[0] = (float)CharToShort(&chrTemp[18])/32768*180;
-		Angle[1] = (float)CharToShort(&chrTemp[20])/32768*180;
-		Angle[2] = (float)CharToShort(&chrTemp[22])/32768*180;
-		
-		printf("0x50:  a:%.3f %.3f %.3f w:%.3f %.3f %.3f  h:%.0f %.0f %.0f  Angle:%.3f %.3f %.3f \r\n",a[0],a[1],a[2],w[0],w[1],w[2],h[0],h[1],h[2],Angle[0],Angle[1],Angle[2]);
-		
-		
+//		//printf("Angle:%.3f %.3f %.3f\r\n",(float)stcAngle.Angle[0]/32768*180,(float)stcAngle.Angle[1]/32768*180,(float)stcAngle.Angle[2]/32768*180);
+		x = (float)stcAngle.Angle[0]/32768*180;
+		y = (float)stcAngle.Angle[1]/32768*180;
+		z = (float)stcAngle.Angle[2]/32768*180;
+		printf("angle-x:%d,angle-y:%d,angle-z:%d\r\n",x,y,z);
 		if(ReceiveComplete)
 		{
 			printf("fill in data\n");
@@ -105,22 +95,37 @@ int main(void)
 			pitch_angle       = DMA_Rece_Buf[12]; 
 		  roll_angle        = DMA_Rece_Buf[13];
       light_pwm         = DMA_Rece_Buf[14];			
-			ReceiveComplete = false;
-			printf("leftFront_EN value = %d \n",leftFront_EN);
-			printf("leftFront_DIR value = %d \n",leftFront_DIR);
-			printf("leftFront_pwm value = %d \n",leftFront_pwm);
-			printf("rightFront_EN value = %d \n",rightFront_EN);
-			printf("rightFront_DIR value = %d \n",rightFront_DIR);
-			printf("rightFront_pwm value = %d \n",rightFront_pwm);
-		  printf("leftBack_EN value = %d \n",leftBack_EN);
-			printf("leftBack_DIR value = %d \n",leftBack_DIR);
-			printf("leftBack_pwm value = %d \n",leftBack_pwm);
-			printf("rightBack_EN value = %d \n",rightBack_EN);
-			printf("rightBack_DIR value = %d \n",rightBack_DIR);
-			printf("rightBack_pwm value = %d \n",rightBack_pwm);
-			printf("pitch_angle value = %d \n",pitch_angle);			
-			printf("roll_angle value = %d \n",roll_angle);		
-			printf("light_pwm value = %d \n",light_pwm);			
+			ReceiveComplete = false;			
+		}
+    //bool strightFlag = false;
+    //bool first_in = true;		
+		if(!strightFlag && leftFront_pwm==rightFront_pwm)
+		{
+			 first_in = true;
+		}
+		strightFlag = false;
+		if(leftFront_pwm==rightFront_pwm)
+		{
+			strightFlag = true;
+		}
+		
+		if(strightFlag && first_in)
+		{
+			ini_angle = (float)stcAngle.Angle[2]/32768*180;
+			first_in = false;
+		}
+		
+		cur_angle = (float)stcAngle.Angle[2]/32768*180;	
+    if(strightFlag)		
+		{
+			if(cur_angle<ini_angle){
+				leftFront_pwm --;
+				leftBack_pwm --;
+			}
+			else{
+				rightFront_pwm--;
+				rightBack_pwm--;
+	    }
 		}
 		
 		LeftFrontMotor(leftFront_EN, leftFront_DIR, leftFront_pwm);

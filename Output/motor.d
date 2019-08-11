@@ -29,4 +29,3 @@
 ..\output\motor.o: ..\Libraries\FWlib\inc\stm32f10x_usart.h
 ..\output\motor.o: ..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 ..\output\motor.o: ..\Libraries\FWlib\inc\misc.h
-..\output\motor.o: ..\User\gpio_config.h

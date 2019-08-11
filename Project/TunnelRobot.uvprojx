@@ -369,7 +369,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Libraries\FWlib\inc;..\Libraries\CMSIS;..\User;..\User\MOTOR;..\User\DELAY;..\User\SYS;..\User\SERVO;..\User\ADC;..\User\USART;..\User\DMA;..\User\LIGHT;..\User\IIC</IncludePath>
+              <IncludePath>..\Libraries\FWlib\inc;..\Libraries\CMSIS;..\User;..\User\MOTOR;..\User\DELAY;..\User\SYS;..\User\SERVO;..\User\ADC;..\User\USART;..\User\DMA;..\User\LIGHT;..\User\IIC;..\User\USART-IIC</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -540,7 +540,12 @@
             <File>
               <FileName>IOI2C.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\User\IIC\IOI2C.c</FilePath>
+              <FilePath>..\User\USART-IIC\IOI2C.c</FilePath>
+            </File>
+            <File>
+              <FileName>UART2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\USART-IIC\UART2.c</FilePath>
             </File>
           </Files>
         </Group>

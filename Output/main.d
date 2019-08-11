@@ -30,7 +30,6 @@
 ..\output\main.o: ..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 ..\output\main.o: ..\Libraries\FWlib\inc\misc.h
 ..\output\main.o: ..\User\MOTOR\motor.h
-..\output\main.o: ..\User\gpio_config.h
 ..\output\main.o: ..\User\DELAY\delay.h
 ..\output\main.o: ..\User\SYS\sys.h
 ..\output\main.o: ..\User\ADC\bsp_adc.h
@@ -39,5 +38,7 @@
 ..\output\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 ..\output\main.o: ..\User\LIGHT\light.h
 ..\output\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+..\output\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+..\output\main.o: ..\User\USART-IIC\JY901.h
+..\output\main.o: ..\User\USART-IIC\UART2.h
 ..\output\main.o: ..\User\IIC\IOI2C.h
-..\output\main.o: ..\User\IIC\REG.h
