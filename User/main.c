@@ -1,54 +1,4 @@
-#include "stm32f10x.h"
-#include "motor.h"
-#include "delay.h"
-#include "sys.h"
-#include "bsp_adc.h"
-#include "motor.h"
-#include "servo.h"
-//#include "bsp_usart.h"
-#include "dma_uart.h"
-#include "light.h"
-#include <stdbool.h>
-
-//#include "IOI2C.h"
-//#include "REG.h"
-//********************************控制变量定义***********************************//
-//4个字节
-uint8_t   pitch_angle =15;
-uint8_t   roll_angle  =15;
-//3个字节
-BitAction  leftFront_EN;
-BitAction  leftFront_DIR;
-uint8_t    leftFront_pwm;
-//3个字节
-BitAction  rightFront_EN;
-BitAction  rightFront_DIR;
-uint8_t    rightFront_pwm;
-
-BitAction  leftBack_EN;
-BitAction  leftBack_DIR;
-uint8_t    leftBack_pwm;
-
-BitAction  rightBack_EN;
-BitAction  rightBack_DIR;
-uint8_t    rightBack_pwm;
-//4个字节
-
-uint8_t    light_pwm;
-
-#define ON   Bit_SET
-#define OFF  Bit_RESET 
-
-#define FORW Bit_SET
-#define BACK Bit_RESET
-
-// ADC1转换的电压值通过MDA方式传到SRAM
-extern __IO uint16_t ADC_ConvertedValue[NOFCHANEL];	 
-uint32_t ADC_ConvertedValueLocal[NOFCHANEL]; 
-extern uint8_t DMA_Rece_Buf[DMA_Rec_Len];
-bool  ReceiveComplete = false;
-
-
+#include "main.h"
 
 /**
   * @problem  电机驱动板第二个通道无法控制电机转
@@ -72,22 +22,22 @@ bool  ReceiveComplete = false;
   * @date  7/14/2019 
   * @solution 无
   */
-	
-void ShortToChar(short sData,unsigned char cData[]);
-short CharToShort(unsigned char cData[]);
 
 int main(void)
 {
+	unsigned char chrTemp[30];
+	//unsigned char str[100];
+	float a[3],w[3],h[3],Angle[3];
+	
 	delay_init();
-	ADCx_Init();
+	//ADCx_Init();
+	IIC_Init();
 	General_Motor_Config();
 	General_Servo_Config();
 	DMA_UART_Config();
 	General_Light_Config();
+	
 	PlatAngleSet(15, 16);
-	//*******************************************************************//
-  //PlatAngleSet(15, 15);
-
 	LightPwnSet(0);
 	LeftFrontMotor(ON, BACK, 0);    // 1
 	RightFrontMotor(ON, FORW, 0);    // 2
@@ -102,20 +52,41 @@ int main(void)
 		DMA_Rece_Buf[i]=0;
 	}
 	
+//**********************************************************************//
+//	while(1)
+//	{
+//		if(ReceiveComplete)
+//		{
+//			if(DMA_Rece_Buf[0]==127 && DMA_Rece_Buf[1]==127)
+//			{
+//			  printf("uart debug start\n");
+//				ReceiveComplete = false;
+//			  break;
+//			}
+//		}
+//	}
+//**********************************************************************//
+	
 	while(1)
 	{
-		if(ReceiveComplete)
-		{
-			if(DMA_Rece_Buf[0]==127 && DMA_Rece_Buf[1]==127)
-			{
-			  printf("uart debug start\n");
-				ReceiveComplete = false;
-			  break;
-			}
-		}
-	}
-	while(1)
-	{
+		delay_ms(100);
+		IICreadBytes(0x50, AX, 24,&chrTemp[0]);
+		a[0] = (float)CharToShort(&chrTemp[0])/32768*16;
+		a[1] = (float)CharToShort(&chrTemp[2])/32768*16;
+		a[2] = (float)CharToShort(&chrTemp[4])/32768*16;
+		w[0] = (float)CharToShort(&chrTemp[6])/32768*2000;
+		w[1] = (float)CharToShort(&chrTemp[8])/32768*2000;
+		w[2] = (float)CharToShort(&chrTemp[10])/32768*2000;
+		h[0] = CharToShort(&chrTemp[12]);
+		h[1] = CharToShort(&chrTemp[14]);
+		h[2] = CharToShort(&chrTemp[16]);
+		Angle[0] = (float)CharToShort(&chrTemp[18])/32768*180;
+		Angle[1] = (float)CharToShort(&chrTemp[20])/32768*180;
+		Angle[2] = (float)CharToShort(&chrTemp[22])/32768*180;
+		
+		printf("0x50:  a:%.3f %.3f %.3f w:%.3f %.3f %.3f  h:%.0f %.0f %.0f  Angle:%.3f %.3f %.3f \r\n",a[0],a[1],a[2],w[0],w[1],w[2],h[0],h[1],h[2],Angle[0],Angle[1],Angle[2]);
+		
+		
 		if(ReceiveComplete)
 		{
 			printf("fill in data\n");
@@ -151,6 +122,7 @@ int main(void)
 			printf("roll_angle value = %d \n",roll_angle);		
 			printf("light_pwm value = %d \n",light_pwm);			
 		}
+		
 		LeftFrontMotor(leftFront_EN, leftFront_DIR, leftFront_pwm);
 		RightFrontMotor(rightFront_EN, rightFront_DIR, rightFront_pwm);
     LeftBackMotor(leftBack_EN, leftBack_DIR, leftBack_pwm);
@@ -158,15 +130,4 @@ int main(void)
 		PlatAngleSet(pitch_angle, roll_angle);
 		LightPwnSet(light_pwm);
 	}
-}
-/*********************************************END OF FILE**********************/
-// char 1 byte      short 2 bytes
-void ShortToChar(short sData,unsigned char cData[])
-{
-	cData[0]=sData&0xff;
-	cData[1]=sData>>8;
-}
-short CharToShort(unsigned char cData[])
-{
-	return ((short)cData[1]<<8)|cData[0];
 }

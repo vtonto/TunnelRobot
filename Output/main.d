@@ -1,4 +1,5 @@
 ..\output\main.o: ..\User\main.c
+..\output\main.o: ..\User\main.h
 ..\output\main.o: ..\Libraries\CMSIS\stm32f10x.h
 ..\output\main.o: ..\Libraries\CMSIS\core_cm3.h
 ..\output\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
@@ -38,3 +39,5 @@
 ..\output\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 ..\output\main.o: ..\User\LIGHT\light.h
 ..\output\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+..\output\main.o: ..\User\IIC\IOI2C.h
+..\output\main.o: ..\User\IIC\REG.h

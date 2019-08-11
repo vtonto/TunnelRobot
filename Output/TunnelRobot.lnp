@@ -21,6 +21,7 @@
 "..\output\servo.o"
 "..\output\dma_uart.o"
 "..\output\light.o"
+"..\output\ioi2c.o"
 --library_type=microlib --ro-base 0x08000000 --entry 0x08000000 --rw-base 0x20000000 --entry Reset_Handler --first __Vectors --strict --summary_stderr --info summarysizes --map --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list "..\Listing\TunnelRobot.map" -o ..\Output\TunnelRobot.axf
